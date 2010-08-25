@@ -1,0 +1,8 @@
+# This is just here because git will by default ignore an empty folder, and we
+# have chosen to ignore everything within this folder, therefore this folder
+# would be ignored because it is empty. This file allows something to exist 
+# within this folder. 
+#
+# We want this folder to exist because the Eclipse Android plugin tends to 
+# complain if it has to re-create the bin/ and gen/ folders instead of just
+# happily re-generating them and their contents
