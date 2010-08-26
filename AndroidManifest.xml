@@ -3,20 +3,31 @@
 	package="me.turnerha" android:versionCode="1" android:versionName="1.0">
 	<application android:icon="@drawable/icon" android:label="@string/app_name">
 
-		<receiver android:name=".WiFiStateChangedReceiver">
+		<receiver android:name=".WifiStateReceiver">
 			<intent-filter>
 				<action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
 			</intent-filter>
 		</receiver>
 
+		<!--
+			TODO: Listen for a state change to the background data service state
+			and call stop service if the background data was turned off
+		-->
+		<receiver android:name=".InetStateReceiver">
+			<intent-filter>
+				<action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+			</intent-filter>
+		</receiver>
+
 		<service android:name=".WiFiReporterService" />
+		<service android:name=".CellularUploadService" />
 
 
 	</application>
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-	
+
 	<uses-sdk android:minSdkVersion="3" />
 
 </manifest> 

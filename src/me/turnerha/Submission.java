@@ -5,7 +5,6 @@ import org.json.JSONObject;
 
 import android.location.Location;
 import android.net.wifi.WifiInfo;
-import android.util.Log;
 
 public class Submission {
 	private JSONObject me_;
@@ -23,8 +22,8 @@ public class Submission {
 	}
 
 	public void submit() {
-		Log.i(Constants.tag, "Submitting update");
-		Log.i(Constants.tag, me_.toString());
+		Log.i(Log.mainTag, "Submitting update");
+		Log.i(Log.mainTag, me_.toString());
 	}
 
 	private static JSONObject serialize(WifiInfo info) {
