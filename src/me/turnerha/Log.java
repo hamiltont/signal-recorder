@@ -7,6 +7,7 @@ public class Log {
 	private static final boolean LOG_METHOD_NAME = false;
 	private static final boolean LOG_LINE_NUMBER = false;
 
+	// These are really just for production so I can turn off all logging
 	private static final boolean LOG_V = true;
 	private static final boolean LOG_I = true;
 	private static final boolean LOG_D = true;
