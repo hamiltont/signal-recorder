@@ -2,14 +2,20 @@ package me.turnerha;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.IBinder;
 
 public class CellularUploadService extends Service {
 
+	private CellularUploadTask backgroundTask_;
+
 	public void onCreate() {
 		super.onCreate();
-
+		
 		// Open Database here
+		backgroundTask_ = new CellularUploadTask();
+
+		Log.d("Creating the CellularUploadTask");
 	}
 
 	// TODO - There are multiple potential ways to handle the service being
@@ -20,6 +26,10 @@ public class CellularUploadService extends Service {
 
 		// Ensure a single instance of the upload thread has been created and
 		// started
+		if (backgroundTask_.getStatus() == AsyncTask.Status.PENDING) {
+			Log.d("Starting the CellularUploadTask");
+			backgroundTask_.execute(this.getApplicationContext());
+		}
 
 		return 0;
 	}
@@ -30,6 +40,8 @@ public class CellularUploadService extends Service {
 		// Note that this is likely being called in the main event thread from a
 		// call to stopService. We should wrap things up as fast as possible. I
 		// am not sure how to abort a currently running internet request
+		backgroundTask_.cancel(false);
+		Log.d("Cancelling CellularUploadTask (no interruption allowed)");
 	}
 
 	@Override

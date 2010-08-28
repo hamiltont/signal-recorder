@@ -1,5 +1,6 @@
 package me.turnerha.db;
 
+import me.turnerha.Log;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -19,6 +20,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 	private static final String CREATE_TABLE_Cellular = "CREATE TABLE      "
 			+ TABLE_NAME_Cell_Network + "                                  "
 			+ "(                                                           "
+			+ "    _id      INTEGER PRIMARY KEY,                           "
 			+ "    rssi     INTEGER,                                       "
 			+ "    lat      REAL,                                          "
 			+ "    lon      REAL,                                          "
@@ -31,6 +33,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
+		Log.v("Creating the DB");
 		db.execSQL(CREATE_TABLE_Cellular);
 	}
 

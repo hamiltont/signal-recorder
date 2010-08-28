@@ -4,15 +4,16 @@ public class Log {
 	public static final String mainTag = "signal-reporter";
 
 	private static final boolean LOG_CLASS_NAME = true;
-	private static final boolean LOG_METHOD_NAME = false;
+	private static final boolean LOG_METHOD_NAME = true;
 	private static final boolean LOG_LINE_NUMBER = false;
+	private static final boolean LOG_THREAD_NAME = true;
 
 	// These are really just for production so I can turn off all logging
-	private static final boolean LOG_V = true;
-	private static final boolean LOG_I = true;
-	private static final boolean LOG_D = true;
-	private static final boolean LOG_W = true;
-	private static final boolean LOG_E = true;
+	private static final boolean LOG_V = false;
+	private static final boolean LOG_I = false;
+	private static final boolean LOG_D = false;
+	private static final boolean LOG_W = false;
+	private static final boolean LOG_E = false;
 
 	@SuppressWarnings("all")
 	public static void d(Object... message) {
@@ -63,7 +64,6 @@ public class Log {
 		final StringBuilder s = new StringBuilder();
 
 		if (LOG_CLASS_NAME | LOG_LINE_NUMBER | LOG_METHOD_NAME) {
-			// Append the class name, the method name, and the line
 			StackTraceElement[] steArray = Thread.currentThread()
 					.getStackTrace();
 
@@ -83,6 +83,10 @@ public class Log {
 				s.append("Line ").append(callerSTE.getLineNumber())
 						.append(": ");
 		}
+
+		if (LOG_THREAD_NAME)
+			s.append("Thread '").append(Thread.currentThread().getName())
+					.append("': ");
 
 		for (Object str : msg)
 			s.append(str.toString()).append(' ');
