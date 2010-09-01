@@ -27,7 +27,13 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 			+ "    accuracy REAL                                           "
 			+ ");                                                          ";
 
-	protected DatabaseOpenHelper(Context c) {
+	/**
+	 * Note that whoever calls this method should also be the one calling
+	 * db.open and db.close. If you don't know how to properly manage the
+	 * database lifecycle, please use the methods in CellularUploadQueue that
+	 * accept a Context parameter - they will manage the database for you
+	 */
+	public DatabaseOpenHelper(Context c) {
 		super(c, dbName, null, version);
 	}
 

@@ -4,7 +4,6 @@ import me.turnerha.Log;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
 public class CellularUploadQueue {
@@ -26,12 +25,7 @@ public class CellularUploadQueue {
 
 		DatabaseOpenHelper oh = new DatabaseOpenHelper(context);
 		SQLiteDatabase db = null;
-		try {
-			db = oh.getWritableDatabase();
-		} catch (SQLException sle) {
-			Log.i("Unable to open a writable database");
-			return;
-		}
+		db = oh.getWritableDatabase();
 
 		enqueue(record, db);
 
@@ -45,8 +39,8 @@ public class CellularUploadQueue {
 	 * 
 	 * @param record
 	 * @param db
-	 *            an open database. This method will not close the database,
-	 *            only any Cursors that it creates
+	 *            an open writable database. This method will not close the
+	 *            database, only any Cursors that it creates
 	 */
 	public static void enqueue(CellularSignalRecord record, SQLiteDatabase db) {
 		ContentValues values = new ContentValues(4);
@@ -71,24 +65,31 @@ public class CellularUploadQueue {
 	 * 
 	 */
 	public static CellularSignalRecord getNext(Context context) {
-
 		Log.v("Getting next record");
 
 		DatabaseOpenHelper oh = new DatabaseOpenHelper(context);
-		SQLiteDatabase db = null;
-		try {
-			db = oh.getWritableDatabase();
-		} catch (SQLException sle) {
-			Log.i("Unable to open a writable database");
-			return null;
-		}
+		SQLiteDatabase db = oh.getReadableDatabase();
 
 		CellularSignalRecord record = getNext(db);
 		db.close();
 		return record;
 	}
 
+	/**
+	 * If you are using a DB multiple times back to back, this method is useful
+	 * for allowing you to control opening and closing the DB, and performing
+	 * many method calls rapidly in the middle.
+	 * 
+	 * @param record
+	 * @param db
+	 *            an open readable database. This method will not close the
+	 *            database, only any Cursors that it creates
+	 */
 	public static CellularSignalRecord getNext(SQLiteDatabase db) {
+
+		if (db.isOpen() == false)
+			throw new IllegalStateException(
+					"The db must have already been opened with getReadableDatabase");
 
 		Cursor c = db.query(TABLE_NAME, ALL_COLUMNS, null, null, null, null,
 				COLUMN_ID + " ASC");
@@ -105,13 +106,11 @@ public class CellularUploadQueue {
 		double acc = c.getDouble(c.getColumnIndex(COLUMN_Accuracy));
 
 		c.close();
-		db.close();
 
 		CellularSignalRecord cm = new CellularSignalRecord(rssi, lat, lon, acc,
 				id);
 
 		Log.v("Got next record:", cm);
-
 		return cm;
 	}
 
@@ -120,13 +119,22 @@ public class CellularUploadQueue {
 
 		DatabaseOpenHelper oh = new DatabaseOpenHelper(context);
 		SQLiteDatabase db = null;
-		try {
-			db = oh.getWritableDatabase();
-		} catch (SQLException sle) {
-			Log.i("Unable to open a writable database");
-			throw sle;
-		}
+		db = oh.getWritableDatabase();
 
+		remove(db, cm);
+		db.close();
+	}
+
+	/**
+	 * If you are using a DB multiple times back to back, this method is useful
+	 * for allowing you to open the DB once, and then perform tons of methods
+	 * before closing it.
+	 * 
+	 * @param db
+	 *            an open writable database. This method will not close the
+	 *            database, only any Cursors that it creates
+	 */
+	public static void remove(SQLiteDatabase db, CellularSignalRecord cm) {
 		StringBuilder sb = new StringBuilder(COLUMN_ID);
 		sb.append("='").append(cm.getRowId()).append("'");
 
@@ -137,8 +145,6 @@ public class CellularUploadQueue {
 		}
 
 		Log.v("Removed record:", cm);
-
-		db.close();
 	}
 
 	/** Returns the number of measurements waiting to be uploaded */
@@ -150,13 +156,27 @@ public class CellularUploadQueue {
 		DatabaseOpenHelper openHelper = new DatabaseOpenHelper(context);
 		SQLiteDatabase db = null;
 		db = openHelper.getReadableDatabase();
-
-		Cursor c = db.query(TABLE_NAME, new String[] { COLUMN_Rssi }, null,
-				null, null, null, null);
-		int count = c.getCount();
-		c.close();
+		int count = size(db);
 		db.close();
 
 		return count;
 	}
+
+	/**
+	 * If you are using a DB multiple times back to back, this method is useful
+	 * for allowing you to open the DB once, and then perform tons of methods
+	 * before closing it.
+	 * 
+	 * @param db
+	 *            an open readable database. This method will not close the
+	 *            database, only any Cursors that it creates
+	 */
+	public static int size(SQLiteDatabase db) {
+		Cursor c = db.query(TABLE_NAME, new String[] { COLUMN_Rssi }, null,
+				null, null, null, null);
+		int count = c.getCount();
+		c.close();
+		return count;
+	}
+
 }

@@ -1,9 +1,12 @@
 package me.turnerha.db;
 
+import android.content.Context;
 import android.location.Location;
+import android.telephony.SignalStrength;
+import android.telephony.TelephonyManager;
 
 public class CellularSignalRecord {
-	int rssi_;
+	SignalStrength signal_;
 	double lat_, lon_, accuracy_;
 	long recordId_ = -1;
 
@@ -12,8 +15,8 @@ public class CellularSignalRecord {
 	 * method can centralize what low-level parameters we are interested in
 	 * gathering.
 	 */
-	public CellularSignalRecord(int rssi, Location loc) {
-		rssi_ = rssi;
+	public CellularSignalRecord(SignalStrength signal, Location loc) {
+		signal_ = signal;
 		lat_ = loc.getLatitude();
 		lon_ = loc.getLongitude();
 		accuracy_ = loc.getAccuracy();
@@ -25,15 +28,15 @@ public class CellularSignalRecord {
 	 */
 	protected CellularSignalRecord(int rssi, double lat, double lon,
 			double accuracy, long rowId) {
-		rssi_ = rssi;
+
 		lat_ = lat;
 		lon_ = lon;
 		accuracy_ = accuracy;
 		recordId_ = rowId;
 	}
 
-	public int getRssi() {
-		return rssi_;
+	protected int getRssi() {
+		return 0;
 	}
 
 	protected long getRowId() {
@@ -42,22 +45,22 @@ public class CellularSignalRecord {
 		return recordId_;
 	}
 
-	public double getLon() {
+	protected double getLon() {
 		return lon_;
 	}
 
-	public double getLat() {
+	protected double getLat() {
 		return lat_;
 	}
 
-	public double getAccuracy() {
+	protected double getAccuracy() {
 		return accuracy_;
 	}
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder("CellularSignalRecord [row:");
-		sb.append(recordId_).append(", rssi:").append(rssi_).append(", lat:")
-				.append(lat_).append(", lon:").append(lon_).append("]");
+		sb.append(recordId_).append(", lat:").append(lat_).append(", lon:")
+				.append(lon_).append("]");
 		return sb.toString();
 	}
 }
