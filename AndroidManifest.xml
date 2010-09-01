@@ -20,6 +20,33 @@
 			</intent-filter>
 		</receiver>
 
+		<!--
+			What we are really looking for here is a way for this class to
+			receive a wakeup call as soon as possible after the application is
+			installed(or the phone turned on, same thing for our purposes).
+
+			Optimally, there should be many more broadcasts registered here
+			besides SCREEN_OFF, but this is just for testing purposes. After this
+			has been called once, it unregisters itself entirely and is never
+			called again
+		-->
+		<!--
+			This is not working properly yet, so I am going to use an Activity to
+			start it for now <receiver android:name=".RegisterListeners">
+			<intent-filter> <action
+			android:name="android.net.conn.CONNECTIVITY_CHANGE" /> <action
+			android:name="android.intent.action.BOOT_COMPLETED" />
+			</intent-filter> </receiver>
+		-->
+
+		<activity android:name=".TempMain">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+
 		<service android:name=".WiFiReporterService" />
 		<service android:name=".CellularUploadService" />
 
@@ -29,7 +56,7 @@
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
 	<uses-sdk android:minSdkVersion="3" />
 
