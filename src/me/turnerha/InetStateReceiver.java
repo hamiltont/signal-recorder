@@ -1,7 +1,6 @@
 package me.turnerha;
 
 import me.turnerha.db.CellularUploadQueue;
-import me.turnerha.db.TestPopulateCellQueue;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -41,16 +40,16 @@ public class InetStateReceiver extends BroadcastReceiver {
 				return;
 
 			// This is to prevent the overhead of turning on a service which
-			// immediately turns itself back off (commented out for testing)
+			// immediately turns itself back off
 			if (CellularUploadQueue.size(context) == 0) {
-				Log.i("There are no records to upload.");
-				Log.i("For now we will insert some records for testing purposes");
-				Log.i("Later on we will simply not start the service");
+				//Log.i("There are no records to upload.");
+				//Log.i("For now we will insert some records for testing purposes");
+				//Log.i("Later on we will simply not start the service");
 				
-				TestPopulateCellQueue a = new TestPopulateCellQueue();
-				a.run(context);
+				//TestPopulateCellQueue a = new TestPopulateCellQueue();
+				//a.run(context);
 				
-				//return;
+				return;
 			}
 
 			Log.i("Starting cellular upload service");
