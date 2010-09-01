@@ -2,9 +2,10 @@ package me.turnerha;
 
 import me.turnerha.db.CellularSignalRecord;
 import me.turnerha.db.CellularUploadQueue;
+import me.turnerha.db.DatabaseOpenHelper;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
-import android.os.Debug;
 
 public class CellularUploadTask extends AsyncTask<Context, Integer, Void> {
 
@@ -22,23 +23,23 @@ public class CellularUploadTask extends AsyncTask<Context, Integer, Void> {
 			return null;
 		}
 
-		Debug.startMethodTracing("signal-recorder");
-		android.util.Log.i("signal-recorder", "Starting trace");
+		DatabaseOpenHelper oh = new DatabaseOpenHelper(context);
+		SQLiteDatabase db = oh.getWritableDatabase();
+
 		CellularSignalRecord record = null;
-		while (null != (record = CellularUploadQueue.getNext(context))) {
+		while (null != (record = CellularUploadQueue.getNext(db))) {
 			if (isCancelled()) {
 				Log.d("Cancel request detected. Cancelling");
-				Debug.stopMethodTracing();
+				db.close();
 				return null;
 			}
 
 			boolean wasUploaded = uploadMeasurement(record);
 			if (wasUploaded)
-				CellularUploadQueue.remove(context, record);
+				CellularUploadQueue.remove(db, record);
 		}
-		
-		Debug.stopMethodTracing();
-		android.util.Log.i("signal-recorder", "Finished trace");
+
+		db.close();
 
 		Log.i("Finished uploading all CellularSignalRecord records");
 		return null;
@@ -52,10 +53,10 @@ public class CellularUploadTask extends AsyncTask<Context, Integer, Void> {
 	private boolean uploadMeasurement(CellularSignalRecord record) {
 		Log.v("Uploading record:", record);
 
-		//if (Math.random() > 0.9d) {
-		//	Log.v("Upload failed");
-		//	return false;
-		//}
+		// if (Math.random() > 0.9d) {
+		// Log.v("Upload failed");
+		// return false;
+		// }
 
 		Log.v("Upload succeeded");
 		return true;
