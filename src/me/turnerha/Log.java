@@ -1,19 +1,22 @@
 package me.turnerha;
 
+
 public class Log {
 	public static final String mainTag = "signal-reporter";
 
 	private static final boolean LOG_CLASS_NAME = true;
 	private static final boolean LOG_METHOD_NAME = true;
 	private static final boolean LOG_LINE_NUMBER = false;
-	private static final boolean LOG_THREAD_NAME = true;
+	private static final boolean LOG_THREAD_NAME = false;
 
-	// These are really just for production so I can turn off all logging
-	private static final boolean LOG_V = false;
-	private static final boolean LOG_I = false;
-	private static final boolean LOG_D = false;
-	private static final boolean LOG_W = false;
-	private static final boolean LOG_E = false;
+	// These are really just for production and performance testing so I can
+	// turn on/off all logging easily
+	private static final boolean LOG = true;
+	private static final boolean LOG_V = true & LOG;
+	private static final boolean LOG_I = true & LOG;
+	private static final boolean LOG_D = true & LOG;
+	private static final boolean LOG_W = true & LOG;
+	private static final boolean LOG_E = true & LOG;
 
 	@SuppressWarnings("all")
 	public static void d(Object... message) {
