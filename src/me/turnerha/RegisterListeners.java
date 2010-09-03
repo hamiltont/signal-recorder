@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.location.LocationManager;
 
 /**
- * Simply starts the CellularRecorder and registers it for various sensors
+ * Simply starts the GpsCorrelator and registers it for various sensors
  * 
  * @author hamiltont
  * 
@@ -22,9 +22,9 @@ public class RegisterListeners extends BroadcastReceiver {
 		called = true;
 
 		// We should never be called again
-		//context.unregisterReceiver(this);
+		// context.unregisterReceiver(this);
 
-		CellularRecorder cr = new CellularRecorder(context);
+		GpsCorrelator cr = new GpsCorrelator(context);
 
 		// We never want location updates from these - we simply use the
 		// getLastKnownLoc internally. We just want to be notified if GPS turns
@@ -33,11 +33,10 @@ public class RegisterListeners extends BroadcastReceiver {
 		LocationManager lm = (LocationManager) context
 				.getSystemService(Context.LOCATION_SERVICE);
 
-		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, Long.MAX_VALUE,
-				Float.MAX_VALUE, cr);
+		lm.addGpsStatusListener(cr);
 
-		lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-				Long.MAX_VALUE, Float.MAX_VALUE, cr);
+		// lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+		// Long.MAX_VALUE, Float.MAX_VALUE, cr);
 
 		Log.i("Registered for the location updates");
 	}

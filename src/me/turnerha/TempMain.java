@@ -12,7 +12,7 @@ public class TempMain extends Activity {
 		
 		Context context = this.getApplicationContext();
 		
-		CellularRecorder cr = new CellularRecorder(context);
+		GpsCorrelator cr = new GpsCorrelator(context);
 
 		// We never want location updates from these - we simply use the
 		// getLastKnownLoc internally. We just want to be notified if GPS turns
@@ -21,11 +21,10 @@ public class TempMain extends Activity {
 		LocationManager lm = (LocationManager) context
 				.getSystemService(Context.LOCATION_SERVICE);
 
-		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, Long.MAX_VALUE,
-				Float.MAX_VALUE, cr);
-
-		lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-				Long.MAX_VALUE, Float.MAX_VALUE, cr);
+		lm.addGpsStatusListener(cr);
+		
+		//lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+		//		Long.MAX_VALUE, Float.MAX_VALUE, cr);
 
 		Log.i("Registered for the location updates");
 
