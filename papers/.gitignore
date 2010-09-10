@@ -1,1 +1,4 @@
-# Ignoring nothing for now
+*.log
+*.gz
+*.aux
+*.pdf

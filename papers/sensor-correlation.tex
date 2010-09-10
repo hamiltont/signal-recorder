@@ -1,0 +1,52 @@
+\documentclass[11pt]{article}
+\usepackage{geometry} 
+\geometry{letterpaper}                   
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+\title{Summary of Software Architectures for Sensor Correlation}
+\author{Hamilton Turner}
+
+\begin{document}
+\maketitle
+
+Modern smart devices are revolutionizing consumer handheld computing, and opening up multiple new areas of research and economic pursuit. A large strength of the modern devices is the number of sensors they carry. These sensors, and associated libraries on the device, allow applications to be contextually aware with a level of ease not before seen in mobile programming. Applications with a wide array of purposes, such as first responder assistance, gaming, or social network, are making use of the sensors on the mobile device to adapt the user's experience. % I need to add in some references here, perhaps to the WreckWatch work, some game, and the FourSquare / Facebook / twitter apps
+These applications, and others, showcase the potential for mobile applications to make use of the sensors on the device to enable context-aware operations. However, one area that has yet to be fully explored is the potential for combining various sensors on the device.
+
+Application developers aiming to combine sensors face multiple challenges. The sensors included on smart devices are typically only moderately accurate. Mathematical models such as Kalman filters could be developed to approximate the overall state of the device. This would be useful for applications such as dead reckoning and inertial navigation that require accurate state information about the device. 
+
+Additionally, the APIs available to retrieve data from the various sensors on the device are both restrictive and not standardized. For example, the Google Android supports multiple external sensors, but two common sensors, the GPS chip and the cellular chip, are accessed in largely different manners. For an application developer, it is not as simple as polling the sensor. This is in part due internal limitations. For example, calculating a GPS location from the raw data returned from the sensor can be costly. However, as a developer it can be both challenging and frustrating to access different sensors in largely different manners. For example, a developer can always query the last known GPS location. This capability is not available for the phone's signal strength, however. A user must register a listener and wait for the next reading to be sent. Differences such as these and others can make using multiple sensors in tandem especially difficult. 
+
+The issues of non-standard APIs further exacerbate the difficulties faced by a developer attempting to preserve resources on an already resource-constrained platform. Many sensors have a warm-up time as a side-effect of their operation, such as the GPS sensor requiring time to lock onto satellites. The non-standard APIs exposed for different sensors make it difficult to work around this warm-up time effectively. The developer has a very limited set of locations in which he or she can request updates from a sensor. Unlike most programming, mobile platforms do not typically operate with a single 'main' entry point. Rather, applications have multiple entry points where they are given a chance to respond to something occurring, such as that application being placed into the foreground of the mobile screen. For the remainder of the lifecycle, the respective operating system controls the flow of execution. The combination of non-standard sensor APIs and limited ability to interact with those APIs results in difficulty for the application developer. % Both of the issues mentioned here - the non-standard APIs and the limited chance to issue instructions are not a fundamentally 'multi-sensor' problem, but they do both have serious repercussions for multi-sensor work. I should rephrase this to indicate that
+
+Correlation of output from multiple disparate sensors is a problem for multiple modern sensor architectures. 
+
+Challenges And Solutions
+\begin{enumerate}
+	\item Sensors are not highly accurate
+
+	Combine multiple sensors. There are many ways of doing this. For example, sensors can be combined to include one 	overall state of the device, in a manner similar to a Kalman filter. Additionally, if sensors readings are mathematically 	related, such as a compass and a gyroscope, than various methods can be used to predict and correct the value of 
+	one sensor by using the other. % Look into Dr. Martin's work here
+
+	\item APIs are restrictive and non-standardized (This also results in frustration for a developer attempting to preserve 		resources)
+	
+	While this issue is obviously exacerbated by the underlying differences of the sensors themselves, the issue at heart 	here is the different methods of interacting with the sensors. For example, some sensors allow polling. Some allow you 	to register a sensor listener that is updated when values are made available. Some allow you to query the last known 	value. However, very few sensors allow all of these options, or even most. 
+	
+	%Not sure what to list as the solution here, but it would be really nice to simply say that we updated the APIs and have a patch put in for the Google Android OS
+		
+	\item Sensors publish at different rates
+	
+	This is partially due to the nature of the sensors themselves, and sometimes due to the application developer 		attempting to preserve the resources of the system. 
+	
+	There are multiple solutions to this problem. For example, a single point of control could remember all of the latest 		sensor values. This results in efficiency and waste as the difference in rates becomes large and more of the values are 	ignored. There could be multiple sensor listeners that attempt to communicate with each other. If a relation between the 	two sensors can be found, then the higher frequency sensor can be use to interpolate the values of the lower 		frequency sensor. 
+	
+	\item Many mobile sensors have warm up times that prevent rapid power toggling 
+	\item Resource spikes can result from 'popular' events in an event driven system. Some sensor events are particularly popular
+	\item It is easy to improperly 'associate' the values from two sensors
+	
+	A developer should always have a final check that the two sensor values are indeed correlated reasonable. For 		example, if a developer attempting to correlate cellular signal strength and gps location uses the time of the two 		measurements, but the mobile device is moving very rapidly, then the correlation will be in error. The developer must 	consider the current speed the device is traveling at
+\end{enumerate}
+
+\end{document}  
