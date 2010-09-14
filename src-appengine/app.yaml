@@ -1,0 +1,11 @@
+application: signalrecorder
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /upload
+  script: upload.py
+
+- url: /.*
+  script: landing.py
