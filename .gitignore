@@ -1,2 +1,5 @@
 # For anyone using a mac
 .DS_Store
+
+# Any compiled python files
+*.pyc
