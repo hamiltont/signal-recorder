@@ -1,0 +1,14 @@
+Google Maps gives you API for adding additional map layers. gheat-ae 
+implements a map tile server for adding heatmap layer.
+
+Full source of gheat-ae can be found at code.google.com/p/gheat-ae. 
+
+I have removed the .svn files here, and I do not plan on incrementally
+committing my changes back upstream. I would liked to have done this, but
+unfortunately my request for committer status on the project has not been
+answered, so I plan to work on the code base separately, and provide patch
+files if they approve of my changes. Also, the difficulty of setting up a svn
+project inside of a git project seemed a bit more than I wanted to manage
+for right now. Perhaps someone could do this later. My version of the 
+gheat-ae code started at subversion revision 5 by author kranasian.
+
