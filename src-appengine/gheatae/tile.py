@@ -9,7 +9,7 @@ import handler
 __docs__  = \
 """
 <html><body>
-This page is basically for requesting tile images. 
+This page is basically for requesting tile images.
 
 Proper URI format is in the form
 <blockquote>www.host.com/path_to_retrieve_tiles/desired_layer/zoom_level/y-value,x-value.png</blockquote>
