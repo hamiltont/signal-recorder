@@ -15,7 +15,7 @@ from gheatae.data import Data
 
 class CatchAll(webapp.RequestHandler):
     def get(self):
-        self.response.out.write("This is the catch all page. \
+        self.response.out.write("This is the catch all page for gheat-ae. \
                                 You probably don't want to be here<br /><br />")
 
         self.response.out.write('<h3>Request URI</h3>')
@@ -31,9 +31,7 @@ class CatchAll(webapp.RequestHandler):
 
 
 application = webapp.WSGIApplication(
-   [('/gheat/tile.*', tile.GetTile),
-    ('/gheat/data.*', Data),
-    ('.*', CatchAll)],
+   [('.*', CatchAll)],
    debug=True)
 
 def main():

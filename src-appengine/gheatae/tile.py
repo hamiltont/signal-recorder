@@ -1,10 +1,16 @@
-from gheatae import color_scheme, dot, tile, cache, provider
-from gheatae.tile import Tile
-from gheatae import consts
+from gheatae.gheatae import color_scheme, dot, tile, cache, provider
+from gheatae.gheatae.tile import Tile
+from gheatae.gheatae import consts
+from gheatae import handler
+
+from google.appengine.ext import webapp
+from google.appengine.ext.webapp.util import run_wsgi_app
+
 from os import environ
+
 import logging
 import time
-import handler
+
 
 __docs__  = \
 """
@@ -110,3 +116,15 @@ class GetTile(handler.Handler):
         err =  err + str(message)
         err += "</body></html>"
         self.respondError(err)
+
+
+
+application = webapp.WSGIApplication(
+    [('/.*', GetTile)],
+    debug=True)
+
+def main():
+    run_wsgi_app(application)
+
+if __name__ == "__main__":
+    main()
