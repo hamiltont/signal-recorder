@@ -21,7 +21,7 @@ handlers:
   
 # Allows interaction(add/rem/upd) with data in GH
 - url: /gheat/data.*
-  script: gheatae/data/py
+  script: gheatae/data.py
   
 # Catches all GH requests that go unanswered
 - url: /gheat.*

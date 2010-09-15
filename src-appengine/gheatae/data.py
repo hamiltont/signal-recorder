@@ -1,6 +1,7 @@
 from gheatae.gheatae import color_scheme, dot, tile, cache, provider
 from gheatae.gheatae.point import DataPoint
 from gheatae.gheatae.tile import Tile
+from gheatae import handler
 
 from google.appengine.ext import db
 from google.appengine.ext import webapp
@@ -9,7 +10,6 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from os import environ
 
 import datetime
-import handler
 import logging
 import time
 
