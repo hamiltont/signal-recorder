@@ -4,14 +4,33 @@ runtime: python
 api_version: 1
 
 handlers:
+# GH stands for gheat-ae
+# SR stands for signal-recorder
+
+# For uploading data into the SR engine
 - url: /upload
   script: upload.py
   
+# For generating test data for the GH engine
+- url: /test
+  script: gheatae/test_generate_data.py
+
+# Provides tiles for the GH tile overlay
+- url: /gheat/tile.*
+  script: gheatae/tile.py
+  
+# Allows interaction(add/rem/upd) with data in GH
+- url: /gheat/data.*
+  script: gheatae/data/py
+  
+# Catches all GH requests that go unanswered
 - url: /gheat.*
   script: gheatae/app_main.py
 
+# All static requests
 - url: /s
   static_dir: static
 
+# Catches all SR requests that go unanswered
 - url: /.*
   script: landing.py
