@@ -30,8 +30,11 @@ for this file.
 
 log = logging.getLogger('tile')
 
+# Set the cache and provider to an app engine-specific cache and provider we
+# created
 tile.cache = cache.Cache()
-tile.provider = provider.DBProvider()
+#tile.provider = provider.DBProvider()
+tile.provider = provider.DummyProvider()
 
 class GetTile(handler.Handler):
 

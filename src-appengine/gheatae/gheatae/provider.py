@@ -32,7 +32,9 @@ class Provider(object):
 
 class DummyProvider(Provider):
 
-  def get_data(self, zoom, layer, x, y):
+  # has foo and bar so that the DummyProvider and the DBProvider can be used
+  # interchangably
+  def get_data(self, zoom, layer, x, y, foo, bar):
     return [ DataPoint(location=GeoPt(37.2344, 82.34)),
             DataPoint(location=GeoPt(37.2344, 82.34)),
             DataPoint(location=GeoPt(37.2344, 82.34)),
