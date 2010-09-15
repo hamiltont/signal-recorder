@@ -11,7 +11,7 @@ Created on Nov 11, 2009
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from gheatae import tile
-from gheatae import data
+from gheatae.data import Data
 
 class CatchAll(webapp.RequestHandler):
     def get(self):
@@ -31,7 +31,7 @@ class CatchAll(webapp.RequestHandler):
 
 application = webapp.WSGIApplication(
    [('/gheat/tile/.*', tile.GetTile),
-    ('/gheat/data/.*', data.Data),
+    ('/gheat/data/.*', Data),
     ('.*', CatchAll)],
    debug=True)
 
