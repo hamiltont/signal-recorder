@@ -15,7 +15,8 @@ from gheatae.data import Data
 
 class CatchAll(webapp.RequestHandler):
     def get(self):
-        self.response.out.write("This is the catch all page. You probably don't want to be here<br /><br />")
+        self.response.out.write("This is the catch all page. \
+                                You probably don't want to be here<br /><br />")
 
         self.response.out.write('<h3>Request URI</h3>')
         self.response.out.write(self.request.uri)
