@@ -9,7 +9,28 @@ import math
 
 log = logging.getLogger('space_level')
 
-# This is the provider of data and interfaced to data interface
+"""
+This is an implementation of the strategy pattern. The core of the gheat code
+should never have know know exactly how the provider and the cache work, they
+should only know that the cache has some available methods for saving and
+retrieving data, and that the provider has some available methods for providing
+data
+
+A standard gheat port has a file structure like:
+$PORT_ROOT
+    /$GHEAT_ROOT
+    port_files.py
+    port_files.py
+    port_files.py
+
+These two values are typically set in one of the port-specific files, allowing
+that specific port to choose how the provider and the cache are implemented for
+that system. In gheat-ae, tile.cache and tile.provider are set in
+$PORT_ROOT/tile.py
+
+Additionally, the interfaces that the port-specific files need to include are
+defined in $GHEAT_ROOT/cache.py and $GHEAT_ROOT/provider.py
+"""
 provider = None
 cache = None
 
@@ -25,6 +46,7 @@ for i in range(LEVEL_MAX):
 class Tile(object):
 
   def __init__(self, layer, zoom, x, y):
+    log.info("Initializing tile");
     self.layer = layer
     self.zoom = zoom
     self.x = x
@@ -84,9 +106,9 @@ class Tile(object):
     cur_dot = dot[self.zoom]
     y_off = int(math.ceil((-1 * self.georange[0] + point.location.lat) / self.zoom_step[0] * 256. - len(cur_dot) / 2))
     x_off = int(math.ceil((-1 * self.georange[1] + point.location.lon) / self.zoom_step[1] * 256. - len(cur_dot[0]) / 2))
-    log.info("lat, lng  dist_lng, dist_lng  Y_off, X_off: (%6.4f, %6.4f) (%6.4f, %6.4f) (%4d, %4d)" % (point.location.lat, point.location.lon,
-                                                                                        (-1 * self.georange[0] + point.location.lat) / self.zoom_step[0] * 256, (-1 * self.georange[1] + point.location.lon) / self.zoom_step[1] * 256,
-                                                                                        y_off, x_off))
+    #log.info("lat, lng  dist_lng, dist_lng  Y_off, X_off: (%6.4f, %6.4f) (%6.4f, %6.4f) (%4d, %4d)" % (point.location.lat, point.location.lon,
+    #                                                                                    (-1 * self.georange[0] + point.location.lat) / self.zoom_step[0] * 256, (-1 * self.georange[1] + point.location.lon) / self.zoom_step[1] * 256,
+    #                                                                                    y_off, x_off))
     return cur_dot, x_off, y_off
 
   def __create_empty_space(self):
@@ -96,8 +118,12 @@ class Tile(object):
     return space
 
   def __get_cached_image(self):
+    log.info("Getting cached image")
+    log.info("Cache is apparently %s" % str(cache))
     if cache.is_available(self.layer, self.x, self.y):
+      log.info("Cached image is available, returning get_image")
       return cache.get_image(self.layer, self.x, self.y)
+    log.info("Cached image is not available")
     return None
 
   def __cache_image(self, tile_dump):
