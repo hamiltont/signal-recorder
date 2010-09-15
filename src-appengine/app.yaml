@@ -6,12 +6,12 @@ api_version: 1
 handlers:
 - url: /upload
   script: upload.py
-
-- url: /map.*
-  static_dir: map
   
 - url: /gheat.*
   script: gheatae/app_main.py
+
+- url: /s
+  static_dir: static
 
 - url: /.*
   script: landing.py

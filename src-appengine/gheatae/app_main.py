@@ -31,8 +31,8 @@ class CatchAll(webapp.RequestHandler):
 
 
 application = webapp.WSGIApplication(
-   [('/gheat/tile/.*', tile.GetTile),
-    ('/gheat/data/.*', Data),
+   [('/gheat/tile.*', tile.GetTile),
+    ('/gheat/data.*', Data),
     ('.*', CatchAll)],
    debug=True)
 
