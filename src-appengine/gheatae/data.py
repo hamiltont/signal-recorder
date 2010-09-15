@@ -106,7 +106,8 @@ class Data(handler.Handler):
             weight = int(weight)
             range = int(range)
 
-            new_data = DataPoint(location, timeOccurred, weight, range)
+            new_data = DataPoint(location=location, time=timeOccurred, \
+                                 weight=weight, range=range)
             new_data.update_location()  # Updates the geocell properties of the
                                         # location. Seems like this could go in
                                         # the __init__ of DataPoint
