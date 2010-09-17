@@ -1,4 +1,3 @@
-
 """
 This file declares the interface that a port-specific cache needs to implement.
 

@@ -1,7 +1,12 @@
-from gheatae.gheatae import color_scheme, dot, tile, cache, provider
-from gheatae.gheatae.tile import Tile
-from gheatae.gheatae import consts
-from gheatae import handler
+from gheatae.gheat      import color_scheme
+from gheatae.gheat      import dot
+from gheatae.gheat      import cache
+from gheatae.gheat      import tile
+from gheatae.gheat.tile import Tile
+from gheatae.gheat      import consts
+
+from gheatae.handler    import Handler
+from gheatae.provider   import DBProvider
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
@@ -33,10 +38,10 @@ log = logging.getLogger('tile')
 # Set the cache and provider to an app engine-specific cache and provider we
 # created
 tile.cache = cache.Cache()
-#tile.provider = provider.DBProvider()
-tile.provider = provider.DummyProvider()
+tile.provider = DBProvider()
+#tile.provider = provider.DummyProvider()
 
-class GetTile(handler.Handler):
+class GetTile(Handler):
 
     def get(self):
         if '1' == self.request.get('docs'):

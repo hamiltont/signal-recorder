@@ -1,8 +1,8 @@
-from gheatae.gheatae import color_scheme
-from gheatae.gheatae.dot import dot
-from gheatae.pngcanvas import PNGCanvas
+import color_scheme
+import dot
+from pngcanvas import PNGCanvas
 from random import random, Random
-from gheatae import gmerc
+import gmerc
 
 import logging
 import math
@@ -80,6 +80,9 @@ class Tile(object):
     # By default, multiply per color point
     dot_levels, x_off, y_off = self.get_dot(point)
 
+    y_min = max(y_off, 0)
+    y_max = min(y_off + len(don_levels[0]), len(space_level))
+
     for y in range(y_off, y_off + len(dot_levels)):
       if y < 0 or y >= len(space_level):
         continue
@@ -106,9 +109,17 @@ class Tile(object):
     cur_dot = dot[self.zoom]
     y_off = int(math.ceil((-1 * self.georange[0] + point.location.lat) / self.zoom_step[0] * 256. - len(cur_dot) / 2))
     x_off = int(math.ceil((-1 * self.georange[1] + point.location.lon) / self.zoom_step[1] * 256. - len(cur_dot[0]) / 2))
-    #log.info("lat, lng  dist_lng, dist_lng  Y_off, X_off: (%6.4f, %6.4f) (%6.4f, %6.4f) (%4d, %4d)" % (point.location.lat, point.location.lon,
-    #                                                                                    (-1 * self.georange[0] + point.location.lat) / self.zoom_step[0] * 256, (-1 * self.georange[1] + point.location.lon) / self.zoom_step[1] * 256,
-    #                                                                                    y_off, x_off))
+    """
+    log.info("lat, lng  dist_lng, dist_lng  Y_off, X_off:
+            (%6.4f, %6.4f) (%6.4f, %6.4f) (%4d, %4d)" %
+            (
+                point.location.lat, point.location.lon,
+                (-1 * self.georange[0] + point.location.lat) / self.zoom_step[0] * 256,
+                (-1 * self.georange[1] + point.location.lon) / self.zoom_step[1] * 256,
+                y_off,
+                x_off)
+            )
+    """
     return cur_dot, x_off, y_off
 
   def __create_empty_space(self):
@@ -139,3 +150,32 @@ class Tile(object):
       return self.tile_dump
     else:
       raise Exception("Failure in generation of image.")
+
+  def __str__(self):
+    s = "GH Tile: x, y = %d, %d; zoom, step = %d, %d; rows, cols = %d, %d \
+        " % \
+    (self.x, self.y,
+     self.zoom, self.zoom_step,
+     self.numrows, self.numcols)
+
+    return s
+"""
+  def printAll():
+    s = "GH Tile: x, y = %d, %d; zoom, step = %d, %d; rows, cols = %d, %d \
+        "tile_img, tile_dump % \
+    (self.x, self.y,
+     self.zoom, self.zoom_step,
+     self.numrows, self.numcols)
+
+
+    ,
+
+     self.tile_img, self.tile_dump,
+     self.layer, self.georange,
+     self.decay, self.color_scheme, )
+"""
+
+if __name__ == '__main__':
+    t = Tile('classic', 5, 1,3)
+
+    log.info()

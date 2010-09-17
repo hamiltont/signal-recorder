@@ -1,11 +1,9 @@
-from gheatae.gheatae import color_scheme, dot, tile, cache, provider
-from gheatae.gheatae.point import DataPoint
-from gheatae.gheatae.tile import Tile
-from gheatae import handler
+from gheatae.handler import Handler
+from gheatae.point import DataPoint
 
-from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.api.datastore_types import GeoPt
 
 from os import environ
 
@@ -27,8 +25,8 @@ ccurred/weight/range.cmd
 </blockquote>
 
 For this server, an example would be
-<blockquote>signalrecorder.appspot.com/gheat/data/add/37.123345/-86.5/
-?not sure?/?not sure?/?not sure?.cmd
+<blockquote><a href="http://localhost:8084/gheat/data/add/37.123345/-86.5/1/1/1.cmd">
+localhost:8084/gheat/data/add/37.123345/-86.5/1/1/1.cmd</a>
 </blockquote>
 
 <h4>Acceptable Parameter Values</h4>
@@ -55,7 +53,7 @@ for this file.
 
 log = logging.getLogger('tile')
 
-class Data(handler.Handler):
+class Data(Handler):
 
     def get(self):
         if '1' == self.request.get('docs'):
@@ -104,7 +102,7 @@ class Data(handler.Handler):
             # Actually add the data specified
             lat = float(lat)
             lng = float(lng)
-            location = db.GeoPt(lat, lng)
+            location = GeoPt(lat, lng)
             timeOccurred = datetime.datetime.fromtimestamp(int(timeOccurred))
             weight = int(weight)
             range = int(range)

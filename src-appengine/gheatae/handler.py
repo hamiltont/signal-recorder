@@ -1,6 +1,3 @@
-from gheatae import color_scheme, dot, tile, cache, provider
-from gheatae.tile import Tile
-
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 

@@ -1,4 +1,4 @@
-from gheatae import pngcanvas
+import pngcanvas
 
 import math
 
