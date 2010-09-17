@@ -1,10 +1,31 @@
-from gheatae.geo import geotypes
-from gheatae.gheatae import consts
-from gheatae.gheatae.point import DataPoint
-from google.appengine.api.datastore_types import GeoPt
-import logging
+"""
+This file declares the interface that a port-specific provider needs to implement.
 
-log = logging.getLogger('tile')
+The Provider provided here does nothing, as we cannot make assumptions about what
+kind of persistent storage is available e.g. can we use the file system/
+database? This is an implementation of the strategy pattern.
+
+The core files of the gheat code should never have know know exactly how the
+provider works, they should only know that the provider has some available
+methods for retrieving data. This files declares the methods to override
+
+A standard gheat port has a file structure like:
+$PORT_ROOT
+    /$GHEAT_ROOT
+    some_port_specific_file.py
+    some_port_specific_file.py
+    some_port_specific_file.py
+
+TODO - Create a generic dummy provider that will return new copies of some data
+    type
+
+TODO - This object uses x and y as parameters. I should figure out what these
+    are for.
+
+TODO - Modify the gheat core files and add in checks inside of the tile.py file's
+Tile object's __init__ method. If either tile.cache or tile.provider are null
+then print a nice error indicating that gheat was not ported correctly
+"""
 
 
 class Provider(object):
@@ -14,55 +35,3 @@ class Provider(object):
 
   def get_data(self, layer, x, y):
     pass
-
-#cache_georanges = [ [], ] * consts.MAX_ZOOM
-#cache_zoom_step = [ [], ] * consts.MAX_ZOOM
-
-#for zoom in range(consts.MAX_ZOOM):
-#  width, height = gmerc.ll2px(-90, 180, zoom)
-#  numcols = int(math.ceil(width / 256.0))
-#  numrows = int(math.ceil(height / 256.0))
-#  cache_zoom_step[zoom] = ( 180. / numrows, 360. / numcols )
-#  cache_georanges[zoom] = [ [], ] * numrows
-#  for y in range(numrows):
-#    cache_georanges[zoom][y] = [ [], ] * numcols
-#    for x in range(numcols):
-#      cache_georanges[zoom][y][x] = ( 180. / numrows * y - 90, 360. / numcols * x - 180 )
-
-
-class DummyProvider(Provider):
-
-  # has foo and bar so that the DummyProvider and the DBProvider can be used
-  # interchangably
-  def get_data(self, zoom, layer, x, y, foo, bar):
-    return [ DataPoint(location=GeoPt(37.2344, 82.34)),
-            DataPoint(location=GeoPt(37.2344, 82.34)),
-            DataPoint(location=GeoPt(37.2344, 82.34)),
-            DataPoint(location=GeoPt(37.2344, 82.34)),
-            DataPoint(location=GeoPt(37.2344, 82.34)),
-            DataPoint(location=GeoPt(37.2344, 82.34)),
-            DataPoint(location=GeoPt(37.2344, 82.34)),
-            DataPoint(location=GeoPt(37.2344, 82.34)),
-            DataPoint(location=GeoPt(37.2344, 82.34)),
-            DataPoint(location=GeoPt(37.2344, 82.34)),
-            DataPoint(location=GeoPt(37.2344, 82.34)),
-            DataPoint(location=GeoPt(37.2344, 82.34)),
-            DataPoint(location=GeoPt(37.2344, 82.34)),
-            DataPoint(location=GeoPt(37.2344, 82.34)),
-            DataPoint(location=GeoPt(37.2344, 82.34)),
-            DataPoint(location=GeoPt(37.2344, 82.34)),
-            ]
-
-
-class DBProvider(Provider):
-
-  def get_data(self, zoom, layer, lat_north, lng_west, range_lat, range_lng):
-    log.info("GeoRange: (%6.4f, %6.4f) ZoomStep: (%6.4f, %6.4f)" % (lat_north, lng_west, range_lat, range_lng))
-    log.info("Range: (%6.4f - %6.4f), (%6.4f - %6.4f)" % (min(90, max(-90, lat_north + range_lat)), lat_north, min(180, max(-180, lng_west + range_lng)), lng_west))
-    return DataPoint.bounding_box_fetch(
-        DataPoint.all(),
-        geotypes.Box(min(90, max(-90, lat_north + range_lat)),
-            min(180, max(-180, lng_west + range_lng)),
-            lat_north,
-            lng_west),
-        max_results=1000, )
