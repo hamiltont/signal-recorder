@@ -46,6 +46,8 @@ for i in range(LEVEL_MAX):
   cache_levels.append(int(((-(pow(float(i) - LEVEL_MAX, 2))/LEVEL_MAX) + LEVEL_MAX) / LEVEL_MAX * 255))
 
 class Tile(object):
+  """Typical usage of the tile object involves creation via the constructor,
+  and then calling of Tile.image_out() to get the raw data"""
 
   def __init__(self, layer, zoom, x, y):
     log.info("Initializing tile");
@@ -59,6 +61,8 @@ class Tile(object):
     # attempt to get a cached object
     self.tile_dump = self.__get_cached_image()
     if not self.tile_dump:
+      log.info("No tile was found, creating one from the input data")
+
       # Get the bounds of this tile
       self.width, self.height = gmerc.ll2px(-90, 180, self.zoom)
       self.numcols = int(math.ceil(self.width / 256.0))
@@ -72,19 +76,31 @@ class Tile(object):
                 "range_lat": self.zoom_step[0],
                 "range_lng": self.zoom_step[1]}
 
-
       # Get the points and start plotting data
+      log.info("Getting the tile points from the provider")
       data = provider.get_data(self.zoom, self.layer, **extras)
-      print(data)
+
+      log.info("Plotting the tile")
       self.tile_img = self.plot_image(data)
 
   def plot_image(self, points):
+    """Given an array of points, returns the image data. Initially creates an
+    empty array. Then, for each point the image for that point is retrieved. The
+    image for a point it called the dot for that point. There are various 'dot'
+    images available in progressively larger sizes. The image data in the
+    appropriate dot image is added to the empty array at the appropriate
+    position (retrieved from the point). This occurs for each point, effectively
+    creating a single array of image data that contains all the merged points"""
+
     space_level = self.__create_empty_space()
     for point in points:
       self.__merge_point_in_space(space_level, point)
+
+    log.info("Done merging points, converting data into png");
     return self.convert_image(space_level)
 
   def __merge_point_in_space(self, space_level, point):
+    log.debug("Merging a point")
     # By default, multiply per color point
     dot_levels, x_off, y_off = self.get_dot(point)
 
@@ -103,16 +119,33 @@ class Tile(object):
         space_level[y][x] += dot_level
 
   def convert_image(self, space_level):
+    """Given an array containing the pixel-level infromation regarding coverage,
+    this function first builds a color scheme array to correspond to different
+    coverage values, and then fills in a PNG image with the corresponding color
+    values for each coverage value. Essentially this function transforms coverage
+    info into color info"""
+
+    log.info("Creating png from coverage information")
     tile = PNGCanvas(len(space_level[0]), len(space_level), bgcolor=[0xff,0xff,0xff,0])
+
+    log.debug("Creating color scheme")
     color_scheme = []
     for i in range(LEVEL_MAX):
       color_scheme.append(self.color_scheme.canvas[cache_levels[i]][0])
+    log.debug("Color scheme created")
+
     for y in xrange(len(space_level[0])):
       for x in xrange(len(space_level[0])):
         tile.canvas[y][x] = color_scheme[int(space_level[y][x])]
+
+    log.info("png created");
     return tile
 
   def get_dot(self, point):
+    """Given a point, this returns the dot that matches that zoom level and the
+    x/y offset of that dot. I think this is the offset within the image space
+    e.g. within the pixels of the image"""
+
     #return dot[20], rdm.randint(-20, 260), rdm.randint(-20, 260)
     cur_dot = dot[self.zoom]
     y_off = int(math.ceil((-1 * self.georange[0] + point.get_lat()) / self.zoom_step[0] * 256. - len(cur_dot) / 2))
@@ -131,6 +164,7 @@ class Tile(object):
     return cur_dot, x_off, y_off
 
   def __create_empty_space(self):
+    log.info("Creating an array of empty image data")
     space = []
     for i in range(256):
       space.append( [0.] * 256 )
@@ -149,53 +183,48 @@ class Tile(object):
     return cache.store_image(self.layer, self.x, self.y, tile_dump)
 
   def image_out(self):
+    """This method returns the image data or throws an exception if there was a
+    problem. It attempts to check for a generated image. If one exists, it dumps
+    the image data and attempts to cache the image. If no image dump is found,
+    then the image was neither retrieved from cache or generated, and therefore
+    an error has occurred"""
+    log.info("Image data requested")
     if self.tile_img:
+      log.info("Image was generated. Attempting to dump and cache")
       self.tile_dump = self.tile_img.dump()
       # attempt to cache this
       self.__cache_image(self.tile_dump)
 
     if self.tile_dump:
+      log.info("Returning image")
       return self.tile_dump
     else:
       raise Exception("Failure in generation of image.")
 
   def __str__(self):
-    s = "GH Tile: x, y = %d, %d; zoom, step = %d, [%f, %f]; rows, cols = %d, %d \
-        " % \
-    (self.x, self.y,
+    s = "Gheat Tile: (x, y) = (%d, %d); (zoom, step) = (%d, [%f, %f]); (rows, cols) = (%d, %d)" \
+    % (self.x, self.y,
      self.zoom, self.zoom_step[0], self.zoom_step[1],
      self.numrows, self.numcols)
 
     return s
-"""
-  def printAll():
-    s = "GH Tile: x, y = %d, %d; zoom, step = %d, %d; rows, cols = %d, %d \
-        "tile_img, tile_dump % \
-    (self.x, self.y,
-     self.zoom, self.zoom_step,
-     self.numrows, self.numcols)
-
-
-    ,
-
-     self.tile_img, self.tile_dump,
-     self.layer, self.georange,
-     self.decay, self.color_scheme, )
-"""
 
 
 # Adds the ability to run this file standalone for testing
 if __name__ == '__main__':
     import consts
     from logging import StreamHandler
+    from logging import Formatter
     import sys
 
     log = logging.getLogger(consts.MAIN_LOG)
+    log.setLevel(logging.DEBUG)
 
     if len(log.handlers) == 0:
         handler = StreamHandler(sys.stdout)
-        handler.setLevel(logging.DEBUG)
         log.addHandler(handler)
+        handler.setLevel(logging.DEBUG)
+        handler.setFormatter(Formatter("%(module)s.%(funcName)s() - %(message)s"))
         log.info("Added stream handler")
 
     log.info("Testing tile.py")
@@ -203,3 +232,5 @@ if __name__ == '__main__':
     t = Tile('classic', 5, 1,3)
 
     log.info("Tile is '%s'" % t)
+
+    t.image_out()
