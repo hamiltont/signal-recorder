@@ -1,4 +1,4 @@
-from gheatae.geo.geomodel import GeoModel
+from gheat.geo.geomodel import GeoModel
 from google.appengine.ext import db
 
 class DataPoint(GeoModel):
@@ -10,3 +10,10 @@ class DataPoint(GeoModel):
     time = db.DateTimeProperty()
     weight = db.IntegerProperty()
     range = db.IntegerProperty()
+
+    def get_lat(self):
+        return self.location.lat
+
+    def get_lon(self):
+        return self.location.lon
+

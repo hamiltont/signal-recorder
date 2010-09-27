@@ -29,16 +29,38 @@ Tile object's __init__ method. If either tile.cache or tile.provider are null
 then print a nice exception indicating that gheat was not ported correctly
 """
 
-class Cache(object):
+import logging;
+import consts;
 
+class Cache(object):
   def __init__(self):
+    self._was_user_warned = False
+    self._warning_message = """This is the default Cache object. It provides
+        no caching and should be overridden with a cache of some sort before
+        gheat is used in production. Expect gheat to run very slow without a
+        cache"""
     pass
 
   def is_available(self, layer, x, y):
+    if self._was_user_warned == False:
+        self._was_user_warned = True
+        log = logging.getLogger(consts.MAIN_LOG)
+        log.warn(self._warning_message)
+
     return False
 
   def get_image(self, layer, x, y):
+    if self._was_user_warned == False:
+        self._was_user_warned = True
+        log = logging.getLogger(consts.MAIN_LOG)
+        log.warn(self._warning_message)
+
     return None
 
   def store_image(self, layer, x, y, image_dump):
+    if self._was_user_warned == False:
+        self._was_user_warned = True
+        log = logging.getLogger(consts.MAIN_LOG)
+        log.warn(self._warning_message)
+
     return None

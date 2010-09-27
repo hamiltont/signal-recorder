@@ -18,6 +18,7 @@
 single-point geographic entities in Google App Engine.
 
 TODO(romannurik): document how bounding box and proximity queries work.
+TODO(hturner): Remove this gheat-ae specific code from the gheat folder
 """
 
 __author__ = 'api.roman.public@gmail.com (Roman Nurik)'

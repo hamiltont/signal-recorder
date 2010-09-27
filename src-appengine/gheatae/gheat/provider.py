@@ -27,11 +27,34 @@ Tile object's __init__ method. If either tile.cache or tile.provider are null
 then print a nice error indicating that gheat was not ported correctly
 """
 
+import logging
+from logging import StreamHandler
+import consts
+from point import Point
+import sys
 
 class Provider(object):
 
   def __init__(self):
+    warning_message = """This is the default Provider object. It provides
+        no data at all and should be overridden with a provider of some sort
+        before gheat is used in production. Without overriding this you will
+        never see a heatmap"""
+    log = logging.getLogger(consts.MAIN_LOG)
+
+    log.warn(warning_message)
     pass
 
-  def get_data(self, layer, x, y):
-    pass
+
+  def get_data(self, zoom, layer, **extras):
+    """
+    Extras will contain these keys:
+        - lat_north: The north-most latitude of the bounding box
+        - lng_west: The west-most longitude of the bounding box
+        - range_lat: The range of the bounding box latitude
+        - range_lng: The range of the bounding box longitude
+    """
+
+    p = Point(extras["lat_north"], extras["lng_west"])
+    p2 = Point(extras["lat_north"], extras["lng_west"])
+    return p, p2

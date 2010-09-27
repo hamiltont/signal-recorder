@@ -1,5 +1,7 @@
 import color_scheme
-import dot
+from dot import dot
+from cache import Cache
+from provider import Provider
 from pngcanvas import PNGCanvas
 from random import random, Random
 import gmerc
@@ -31,8 +33,8 @@ $PORT_ROOT/tile.py
 Additionally, the interfaces that the port-specific files need to include are
 defined in $GHEAT_ROOT/cache.py and $GHEAT_ROOT/provider.py
 """
-provider = None
-cache = None
+provider = Provider()
+cache = Cache()
 
 rdm = Random()
 
@@ -64,11 +66,17 @@ class Tile(object):
       self.zoom_step = [ 180. / self.numrows, 360. / self.numcols ]
       self.georange = ( min(90, max(-90, 180. / self.numrows * y - 90)), min(180, max(-180, 360. / self.numcols * x - 180 )))
 
+      # Extra info for provider.get_data
+      extras = {"lat_north": self.georange[0],
+                "lng_west": self.georange[1],
+                "range_lat": self.zoom_step[0],
+                "range_lng": self.zoom_step[1]}
+
+
       # Get the points and start plotting data
-      self.tile_img = self.plot_image(
-          provider.get_data(self.zoom, self.layer,
-                            self.georange[0], self.georange[1],
-                            self.zoom_step[0], self.zoom_step[1]))
+      data = provider.get_data(self.zoom, self.layer, **extras)
+      print(data)
+      self.tile_img = self.plot_image(data)
 
   def plot_image(self, points):
     space_level = self.__create_empty_space()
@@ -81,7 +89,7 @@ class Tile(object):
     dot_levels, x_off, y_off = self.get_dot(point)
 
     y_min = max(y_off, 0)
-    y_max = min(y_off + len(don_levels[0]), len(space_level))
+    y_max = min(y_off + len(dot_levels[0]), len(space_level))
 
     for y in range(y_off, y_off + len(dot_levels)):
       if y < 0 or y >= len(space_level):
@@ -107,8 +115,8 @@ class Tile(object):
   def get_dot(self, point):
     #return dot[20], rdm.randint(-20, 260), rdm.randint(-20, 260)
     cur_dot = dot[self.zoom]
-    y_off = int(math.ceil((-1 * self.georange[0] + point.location.lat) / self.zoom_step[0] * 256. - len(cur_dot) / 2))
-    x_off = int(math.ceil((-1 * self.georange[1] + point.location.lon) / self.zoom_step[1] * 256. - len(cur_dot[0]) / 2))
+    y_off = int(math.ceil((-1 * self.georange[0] + point.get_lat()) / self.zoom_step[0] * 256. - len(cur_dot) / 2))
+    x_off = int(math.ceil((-1 * self.georange[1] + point.get_lon()) / self.zoom_step[1] * 256. - len(cur_dot[0]) / 2))
     """
     log.info("lat, lng  dist_lng, dist_lng  Y_off, X_off:
             (%6.4f, %6.4f) (%6.4f, %6.4f) (%4d, %4d)" %
@@ -152,10 +160,10 @@ class Tile(object):
       raise Exception("Failure in generation of image.")
 
   def __str__(self):
-    s = "GH Tile: x, y = %d, %d; zoom, step = %d, %d; rows, cols = %d, %d \
+    s = "GH Tile: x, y = %d, %d; zoom, step = %d, [%f, %f]; rows, cols = %d, %d \
         " % \
     (self.x, self.y,
-     self.zoom, self.zoom_step,
+     self.zoom, self.zoom_step[0], self.zoom_step[1],
      self.numrows, self.numcols)
 
     return s
@@ -175,7 +183,23 @@ class Tile(object):
      self.decay, self.color_scheme, )
 """
 
+
+# Adds the ability to run this file standalone for testing
 if __name__ == '__main__':
+    import consts
+    from logging import StreamHandler
+    import sys
+
+    log = logging.getLogger(consts.MAIN_LOG)
+
+    if len(log.handlers) == 0:
+        handler = StreamHandler(sys.stdout)
+        handler.setLevel(logging.DEBUG)
+        log.addHandler(handler)
+        log.info("Added stream handler")
+
+    log.info("Testing tile.py")
+
     t = Tile('classic', 5, 1,3)
 
-    log.info()
+    log.info("Tile is '%s'" % t)

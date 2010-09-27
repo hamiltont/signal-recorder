@@ -29,7 +29,14 @@ class DummyProvider(Provider):
 
   # has foo and bar so that the DummyProvider and the DBProvider can be used
   # interchangably
-  def get_data(self, zoom, layer, x, y, foo, bar):
+  def get_data(self, zoom, layer, **extras):
+    """
+    Extras will contain these keys:
+        - lat_north: The north-most latitude of the bounding box
+        - lng_west: The west-most longitude of the bounding box
+        - range_lat: The range of the bounding box latitude
+        - range_lng: The range of the bounding box longitude
+    """
     return [ DataPoint(location=GeoPt(37.2344, 82.34)),
             DataPoint(location=GeoPt(37.2344, 82.34)),
             DataPoint(location=GeoPt(37.2344, 82.34)),
@@ -51,7 +58,19 @@ class DummyProvider(Provider):
 
 class DBProvider(Provider):
 
-  def get_data(self, zoom, layer, lat_north, lng_west, range_lat, range_lng):
+  def get_data(self, zoom, layer, **extras):
+    """
+    Extras will contain these keys:
+        - lat_north: The north-most latitude of the bounding box
+        - lng_west: The west-most longitude of the bounding box
+        - range_lat: The range of the bounding box latitude
+        - range_lng: The range of the bounding box longitude
+    """
+    lat_north = extras['lat_north']
+    lng_west = extras['lng_west']
+    range_lat = extras['range_lat']
+    range_lng = extras['range_lng']
+
     #log.info("GeoRange: (%6.4f, %6.4f) ZoomStep: (%6.4f, %6.4f)" % (lat_north, lng_west, range_lat, range_lng))
     #log.info("Range: (%6.4f - %6.4f), (%6.4f - %6.4f)" % (min(90, max(-90, lat_north + range_lat)), lat_north, min(180, max(-180, lng_west + range_lng)), lng_west))
     return DataPoint.bounding_box_fetch(
