@@ -29,9 +29,12 @@ For this server, an example would be
 You can always append ?docs=1 to the end of your URL to get the docs
 for this file.
 <br>TODO: Add in appropriate possibilities for each of the parameters
+
+<br>Try <a href='%s:%s/gheat/tile/classic/4/4,6.png'>this</a>
+
 <ul><li>zoom_level can be 0 <= zoom_level <= 30</li></ul>
 </html></body>
-"""
+""" % (environ['SERVER_NAME'], environ['SERVER_PORT'])
 
 log = logging.getLogger('tile')
 
@@ -117,10 +120,16 @@ class GetTile(Handler):
             <blockquote>signalrecorder.appspot.com/gheat/tile/classic/4/4,6.png</blockquote>
             You can always append ?docs=1 to the end of your URL to get the docs
             for this file. <br>See <a href='%s%s'>the docs for this page</a><br>
+            <br>Try <a href="%s:%d/gheat/tile/classic/4/4,6.png>this</a>
+
             <br>TODO: Add in appropriate possibilities for each of the parameters
             <ul><li>zoom_level can be %d <= zoom_level <= %d</li></ul>
             <h3>Specific Error Message</h3>""" % (environ['PATH_INFO'], \
-                                                  '?docs=1',0, consts.MAX_ZOOM)
+                                                  '?docs=1', \
+                                                  environ['SERVER_NAME'], \
+                                                  environ['SERVER_PORT'] , \
+                                                  0, \
+                                                  consts.MAX_ZOOM)
         err =  err + str(message)
         err += "</body></html>"
         self.respondError(err)

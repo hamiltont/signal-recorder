@@ -35,11 +35,23 @@ import geomath
 import geotypes
 import util
 
-DEBUG = False
+DEBUG = True
 
+log = logging.getLogger("geomodel")
+log.setLevel(logging.DEBUG)
 
 def default_cost_function(num_cells, resolution):
-  """The default cost function, used if none is provided by the developer."""
+  """The default cost function, used if none is provided by the developer.
+
+  This one returns a cost of 0 if the number of cells is less than or equal to
+  the total number of cells at this resolution. If we have more cells to search
+  than the maximum possible at one resolution, then there is probably a problem
+  ;)
+  """
+
+  if DEBUG:
+    log.info("Using default cost function")
+
   return 1e10000 if num_cells > pow(geocell._GEOCELL_GRID_SIZE, 2) else 0
 
 
@@ -91,6 +103,8 @@ class GeoModel(db.Model):
     Raises:
       Any exceptions that google.appengine.ext.db.Query.fetch() can raise.
     """
+    log.info("bounding_box_fetch started");
+    log.info("Query count is %d" % query.count())
     # TODO(romannurik): Check for GqlQuery.
     results = []
 
@@ -99,12 +113,28 @@ class GeoModel(db.Model):
     query_geocells = geocell.best_bbox_search_cells(bbox, cost_function)
 
     if query_geocells:
+      log.info("query_geocells has some value")
       if query._Query__orderings:
-        # NOTE(romannurik): since 'IN' queries seem boken in App Engine,
+        log.info("query_orderings has some value")
+        # NOTE(romannurik): since 'IN' queries seem broken in App Engine,
         # manually search each geocell and then merge results in-place
+
+        # NOTE(hturner): 'IN' is not broken. For each item in the list, a
+        # separate subquery is performed. GQL only allows 30 total subqueries
+        # for any single GQL query, and the location_geocells often contains
+        # more than 30 items. Hence the 'IN' queries are not working for those
+        # locations. Additionally, cursors cannot be used with 'IN' queries, so
+        # that may be another issue.
+
+        # We can probably fix this. We are duplicating a ton of
+        # data. Ex: 9,9a,9a3,9a37,9a378,9a3787,
+        # Note that if we could just store the 'final' geocell and remove one
+        # char at a time, we get the same result. Note that a left to right
+        # comparison of the chars would work, while just searching for if the
+        # query cell is contained in the final cell would not
         cell_results = [copy.deepcopy(query)
-            .filter('location_geocells =', search_cell)
-            .fetch(max_results) for search_cell in query_geocells]
+          .filter('location_geocells =', search_cell)
+          .fetch(max_results) for search_cell in query_geocells]
 
         # Manual in-memory sort on the query's defined ordering.
         query_orderings = query._Query__orderings or []
@@ -122,14 +152,17 @@ class GeoModel(db.Model):
       else:
         # NOTE: We can't pass in max_results because of non-uniformity of the
         # search.
-        results = (query
-            .filter('location_geocells IN', query_geocells)
-            .fetch(1000))[:max_results]
+        log.info("query_orderings has no value, therefore we are using GQL \
+                 to perform the filtering")
+        log.info("query_geocells are '%s'" % str(query_geocells))
+        results = (query.filter('location_geocells IN', query_geocells).fetch(1000))[:max_results]
+        log.info("Returning %d results" % len(results))
     else:
+      log.info("query_geocells was None, no results being returned")
       results = []
 
     if DEBUG:
-      logging.info('bbox query looked in %d geocells' % len(query_geocells))
+      log.info('bbox query looked in %d geocells' % len(query_geocells))
 
     # In-memory filter.
     return [entity for entity in results if
@@ -212,7 +245,7 @@ class GeoModel(db.Model):
       # Update results and sort.
       new_results = temp_query.fetch(1000)
       if DEBUG:
-        logging.info('fetch complete for %s' % (','.join(cur_geocells_unique),))
+        log.info('fetch complete for %s' % (','.join(cur_geocells_unique),))
 
       searched_cells.update(cur_geocells)
 
@@ -270,12 +303,12 @@ class GeoModel(db.Model):
       # We don't have enough items yet, keep searching.
       if len(results) < max_results:
         if DEBUG:
-          logging.debug('have %d results but want %d results, '
+          log.debug('have %d results but want %d results, '
                         'continuing search' % (len(results), max_results))
         continue
 
       if DEBUG:
-        logging.debug('have %d results' % (len(results),))
+        log.debug('have %d results' % (len(results),))
 
       # If the currently max_results'th closest item is closer than any
       # of the next test geocells, we're done searching.
@@ -284,20 +317,20 @@ class GeoModel(db.Model):
       if (closest_possible_next_result_dist >=
           current_farthest_returnable_result_dist):
         if DEBUG:
-          logging.debug('DONE next result at least %f away, '
+          log.debug('DONE next result at least %f away, '
                         'current farthest is %f dist' %
                         (closest_possible_next_result_dist,
                          current_farthest_returnable_result_dist))
         break
 
       if DEBUG:
-        logging.debug('next result at least %f away, '
+        log.debug('next result at least %f away, '
                       'current farthest is %f dist' %
                       (closest_possible_next_result_dist,
                        current_farthest_returnable_result_dist))
 
     if DEBUG:
-      logging.info('proximity query looked '
+      log.info('proximity query looked '
                    'in %d geocells' % len(searched_cells))
 
     return [entity for (entity, dist) in results[:max_results]

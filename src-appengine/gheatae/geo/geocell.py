@@ -72,6 +72,7 @@ import sys
 
 import geomath
 import geotypes
+import logging
 
 # Geocell algorithm constants.
 _GEOCELL_GRID_SIZE = 4
@@ -93,6 +94,9 @@ SOUTH = (0, -1)
 SOUTHWEST = (-1, -1)
 WEST = (-1, 0)
 
+DEBUG = True
+log = logging.getLogger("geomodel")
+log.setLevel(logging.DEBUG)
 
 def best_bbox_search_cells(bbox, cost_function):
   """Returns an efficient set of geocells to search in a bounding box query.
@@ -111,8 +115,15 @@ def best_bbox_search_cells(bbox, cost_function):
   Returns:
     A list of geocell strings that contain the given box.
   """
+  if DEBUG:
+    log.info("Finding bounding box for box %s" % str(bbox))
+
   cell_ne = compute(bbox.north_east, resolution=MAX_GEOCELL_RESOLUTION)
   cell_sw = compute(bbox.south_west, resolution=MAX_GEOCELL_RESOLUTION)
+
+  if DEBUG:
+    log.debug("Cell NE is %s" %str(cell_ne))
+    log.debug("Cell SW is %s" %str(cell_sw))
 
   # The current lowest BBOX-search cost found; start with practical infinity.
   min_cost = 1e10000
@@ -124,14 +135,28 @@ def best_bbox_search_cells(bbox, cost_function):
   # resolution.. i.e. we don't have to look at any higher resolution cells.
   min_resolution = len(os.path.commonprefix([cell_sw, cell_ne]))
 
+  if DEBUG:
+    log.debug("Minimum resolution is %s" % min_resolution)
+
   # Iteravely calculate all possible sets of cells that wholely contain
   # the requested bounding box.
   for cur_resolution in range(min_resolution, MAX_GEOCELL_RESOLUTION + 1):
     cur_ne = cell_ne[:cur_resolution]
     cur_sw = cell_sw[:cur_resolution]
 
+    if DEBUG:
+      log.debug("Current NE resolution is %s" % cur_ne)
+      log.debug("Current SW resolution is %s" % cur_sw)
+
     num_cells = interpolation_count(cur_ne, cur_sw)
+
+    if DEBUG:
+      log.info("Maximum feasible search cells is %d, this search needs %d" % \
+               (MAX_FEASIBLE_BBOX_SEARCH_CELLS, num_cells))
+
     if num_cells > MAX_FEASIBLE_BBOX_SEARCH_CELLS:
+      if DEBUG:
+        log.info("More than max feasible possible searches, aborting")
       continue
 
     cell_set = sorted(interpolate(cur_ne, cur_sw))
@@ -139,14 +164,24 @@ def best_bbox_search_cells(bbox, cost_function):
 
     cost = cost_function(num_cells=len(cell_set), resolution=cur_resolution)
 
+    if DEBUG:
+      log.info("Cost of search is %f" % cost)
+
     # TODO(romannurik): See if this resolution is even possible, as in the
     # future cells at certain resolutions may not be stored.
     if cost <= min_cost:
+      if DEBUG:
+        log.info("New cost of %f is better than or equal to old of %f, using new results" % \
+                 (cost, min_cost))
       min_cost = cost
       min_cost_cell_set = cell_set
     else:
       # Once the cost starts rising, we won't be able to do better, so abort.
       break
+
+    if DEBUG:
+        log.info("New cost of %f is not better than old of %f, keeping old results" \
+                 % (cost, min_cost))
 
   return min_cost_cell_set
 

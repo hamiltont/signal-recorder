@@ -3,13 +3,14 @@ from dot import dot
 from cache import Cache
 from provider import Provider
 from pngcanvas import PNGCanvas
-from random import random, Random
+import consts
+
 import gmerc
 
 import logging
 import math
 
-log = logging.getLogger('space_level')
+log = logging.getLogger(consts.MAIN_LOG)
 
 """
 This is an implementation of the strategy pattern. The core of the gheat code
@@ -36,8 +37,6 @@ defined in $GHEAT_ROOT/cache.py and $GHEAT_ROOT/provider.py
 provider = Provider()
 cache = Cache()
 
-rdm = Random()
-
 LEVEL_MAX = 300
 
 cache_levels = []
@@ -47,7 +46,21 @@ for i in range(LEVEL_MAX):
 
 class Tile(object):
   """Typical usage of the tile object involves creation via the constructor,
-  and then calling of Tile.image_out() to get the raw data"""
+  and then calling of Tile.image_out() to get the raw data
+
+  __Properties__
+  layer seems to be an arbitrary string
+  zoom, x, y are all provided by the Google Maps query on gheat
+  color_scheme is created dynamically. It provides a mapping from every possible
+        'heat' value to a specific color
+
+  width, height seem to be the number of pixels specifying the dimensions of
+        this image
+  numcols, numrows are the number of pixels in a single row or single column
+        when trying to equally divide 256 rows and 256 columns
+  zoom_step has something to do with the numrows & numcols
+  georange is ???
+  """
 
   def __init__(self, layer, zoom, x, y):
     log.info("Initializing tile");
@@ -56,7 +69,6 @@ class Tile(object):
     self.x = x
     self.y = y
     self.color_scheme = color_scheme.cyan_red
-    self.decay = 0.5
 
     # attempt to get a cached object
     self.tile_dump = self.__get_cached_image()
@@ -146,6 +158,8 @@ class Tile(object):
     x/y offset of that dot. I think this is the offset within the image space
     e.g. within the pixels of the image"""
 
+    #from random import random, Random
+    #rdm = Random()
     #return dot[20], rdm.randint(-20, 260), rdm.randint(-20, 260)
     cur_dot = dot[self.zoom]
     y_off = int(math.ceil((-1 * self.georange[0] + point.get_lat()) / self.zoom_step[0] * 256. - len(cur_dot) / 2))
@@ -212,7 +226,6 @@ class Tile(object):
 
 # Adds the ability to run this file standalone for testing
 if __name__ == '__main__':
-    import consts
     from logging import StreamHandler
     from logging import Formatter
     import sys

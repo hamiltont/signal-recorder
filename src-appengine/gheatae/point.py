@@ -1,4 +1,4 @@
-from gheat.geo.geomodel import GeoModel
+from geo.geomodel import GeoModel
 from google.appengine.ext import db
 
 class DataPoint(GeoModel):

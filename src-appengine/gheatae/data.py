@@ -129,6 +129,16 @@ class Data(Handler):
             """ % (str(message), environ['PATH_INFO'], '?docs=1')
         self.respondError(err)
 
+class ClearAll(Handler):
+    def get(self):
+        from google.appengine.ext import db
+        from gheatae.point import DataPoint
+        from google.appengine.ext.db import GeoPt
+
+        dps = DataPoint.all();
+        for dp in dps:
+            dp.delete()
+
 
 
 application = webapp.WSGIApplication(
